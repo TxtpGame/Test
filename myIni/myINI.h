@@ -10,11 +10,25 @@ using namespace std;
 
 namespace MY_INI
 {
+#ifdef WIN32
+#define EndChars "\r\n"
+#else
+#define EndChars "\n"
+#endif
+
+#define MAX_LINE_NUM 2048
+
 struct item
 {
     string key;
     string value;
     string comment;
+    item()
+    {
+        key     = "";
+        value   = "";
+        comment = "";
+    }
 };
 
 struct section
@@ -22,6 +36,20 @@ struct section
     string name;
     vector<item*> items;
     string comment;
+    section()
+    {
+        name    = "";
+        comment = "";
+    }
+    ~section()
+    {
+        for (auto i : items)
+        {
+            delete i;
+        }
+        name    = "";
+        comment = "";
+    }
 };
 
 struct ini
@@ -29,6 +57,19 @@ struct ini
     string filename;
     map<string, section*> sections;
     vector<string> commentFlags;
+    ini()
+    {
+        filename = "";
+        commentFlags.push_back("#");
+    }
+    ~ini()
+    {
+        filename = "";
+        for (auto s : sections)
+        {
+            delete s.second;
+        }
+    }
 };
 
 class myINIParser
@@ -38,12 +79,21 @@ public:
     ~myINIParser();
 
     int load(const string &filename);
-    section* getSection(const string &section) const;
-    item* getItem(const string &section, const string &item) const;
+    int save(const string &filename) const;
 
-    /*获取注释标记符列表*/
+    section* getSection(const string &sectionStr) const;
+    item* getItem(const string &sectionStr, const string &itemStr) const;
+    string getString(const string &sectionStr, const string &itemStr, const string &defaultValue = "") const;
+    int getInt(const string &sectionStr, const string &itemStr, int defaultValue = 0) const;
+    double getDouble(const string &sectionStr, const string &itemStr, double defaultValue = 0) const;
+
+    void delSection(const string &sectionStr);
+    void delItem(const string &sectionStr, const string &itemStr);
+
+    void setSectionValue(const string &sectionStr, const string &commentStr);
+    void setItemValue(const string &sectionStr, const string &itemStr, const string &valueStr, const string &commentStr = "");
+
     void getCommentFlags(vector<string> &flags) const;
-    /*设置注释标记符列表*/
     void setCommentFlags(const vector<string> &flags);
 
 public:
@@ -56,16 +106,14 @@ public:
 
 private:
     bool isComment(const string &str);
-
+    bool parse(const string &content, string &key, string &value, char c = '=');
+    string separateComment(string &str);
+    int getline(string &str, FILE *fp);
 
 private:
     ini *m_ini;
 
 };
 
-
 }
-
-
-
 #endif
