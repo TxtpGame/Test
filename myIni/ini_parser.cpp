@@ -1,23 +1,21 @@
-#include <cstdio>
-#include <cstdlib>
+#include "ini_parser.h"
 
-#include "myINI.h"
-namespace MY_INI
+namespace INI_PARSER
 {
 
 const int INI_BUF_SIZE = 2048;
 
-myINIParser::myINIParser()
+IniParser::IniParser()
 {
     m_ini = new ini();
 }
 
-myINIParser::~myINIParser()
+IniParser::~IniParser()
 {
     delete m_ini;
 }
 
-bool myINIParser::isComment(const string &str)
+bool IniParser::isComment(const string &str)
 {
     for (auto x : m_ini->commentFlags)
     {
@@ -29,7 +27,7 @@ bool myINIParser::isComment(const string &str)
     return false;
 }
 
-string myINIParser::separateComment(string &str)
+string IniParser::separateComment(string &str)
 {
     string comment;
     string line = str;
@@ -47,7 +45,7 @@ string myINIParser::separateComment(string &str)
     return comment;
 }
 
-void myINIParser::trimleft(string &str, char c/* = ' '*/)
+void IniParser::trimleft(string &str, char c/* = ' '*/)
 {
     size_t index = str.find_last_not_of(c);
 
@@ -60,7 +58,7 @@ void myINIParser::trimleft(string &str, char c/* = ' '*/)
         str.clear();
     }
 }
-void myINIParser::trimright(string &str, char c/* = ' '*/)
+void IniParser::trimright(string &str, char c/* = ' '*/)
 {
     size_t index = str.find_first_not_of(c);
 
@@ -74,7 +72,7 @@ void myINIParser::trimright(string &str, char c/* = ' '*/)
     }
 }
 
-void myINIParser::trim(string &str)
+void IniParser::trim(string &str)
 {
     size_t len = str.length();
     size_t i = 0;
@@ -101,21 +99,21 @@ void myINIParser::trim(string &str)
     str = string(str, 0, i + 1);
 }
 
-void myINIParser::getCommentFlags(vector<string> &flags) const
+void IniParser::getCommentFlags(vector<string> &flags) const
 {
     flags = m_ini->commentFlags;
 }
 
-void myINIParser::setCommentFlags(const vector<string> &flags)
+void IniParser::setCommentFlags(const vector<string> &flags)
 {
     m_ini->commentFlags = flags;
 }
 
-int myINIParser::getline(string &str, FILE *fp)
+int IniParser::getline(string &str, FILE *fp)
 {
-    char buf[MAX_LINE_NUM] = {0};
+    char buf[INI_BUF_SIZE] = {0};
     size_t len = 0;
-    if (fgets(buf, MAX_LINE_NUM, fp))
+    if (fgets(buf, INI_BUF_SIZE, fp))
     {
         len = strlen(buf);
     }
@@ -124,7 +122,7 @@ int myINIParser::getline(string &str, FILE *fp)
 
 }
 
-int myINIParser::load(const string &filename)
+int IniParser::load(const string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "r");
     if (fp == NULL)
@@ -219,7 +217,7 @@ int myINIParser::load(const string &filename)
     return 0;
 }
 
-bool myINIParser::parse(const string &content, string &key, string &value, char c/*= '='*/)
+bool IniParser::parse(const string &content, string &key, string &value, char c/*= '='*/)
 {
     size_t index = content.find(c);
     if (index == string::npos || index == 0)
@@ -233,7 +231,7 @@ bool myINIParser::parse(const string &content, string &key, string &value, char 
     return true;
 }
 
-section* myINIParser::getSection(const string &sectionStr) const
+section* IniParser::getSection(const string &sectionStr) const
 {
     auto it = m_ini->sections.find(sectionStr);
     if (it != m_ini->sections.end())
@@ -244,7 +242,7 @@ section* myINIParser::getSection(const string &sectionStr) const
     return NULL;
 }
 
-item* myINIParser::getItem(const string &sectionStr, const string &itemStr) const
+item* IniParser::getItem(const string &sectionStr, const string &itemStr) const
 {
     auto it = m_ini->sections.find(sectionStr);
     if (it == m_ini->sections.end())
@@ -263,7 +261,7 @@ item* myINIParser::getItem(const string &sectionStr, const string &itemStr) cons
     return NULL;
 }
 
-string myINIParser::getString(const string &sectionStr, const string &itemStr, const string &defaultValue/* = ""*/) const
+string IniParser::getString(const string &sectionStr, const string &itemStr, const string &defaultValue/* = ""*/) const
 {
     auto x = getItem(sectionStr, itemStr);
     if (!x)
@@ -273,7 +271,7 @@ string myINIParser::getString(const string &sectionStr, const string &itemStr, c
     return x->value;
 }
 
-int myINIParser::getInt(const string &sectionStr, const string &itemStr, int defaultValue /*= 0*/) const
+int IniParser::getInt(const string &sectionStr, const string &itemStr, int defaultValue /*= 0*/) const
 {
     auto x = getItem(sectionStr, itemStr);
     if (!x)
@@ -283,7 +281,7 @@ int myINIParser::getInt(const string &sectionStr, const string &itemStr, int def
     return atoi(x->value.c_str());
 }
 
-double myINIParser::getDouble(const string &sectionStr, const string &itemStr, double defaultValue /*= 0*/) const
+double IniParser::getDouble(const string &sectionStr, const string &itemStr, double defaultValue /*= 0*/) const
 {
     auto x = getItem(sectionStr, itemStr);
     if (!x)
@@ -293,7 +291,7 @@ double myINIParser::getDouble(const string &sectionStr, const string &itemStr, d
     return atof(x->value.c_str());
 }
 
-void myINIParser::delSection(const string &sectionStr)
+void IniParser::delSection(const string &sectionStr)
 {
     auto it = m_ini->sections.find(sectionStr);
     if (it != m_ini->sections.end())
@@ -302,7 +300,7 @@ void myINIParser::delSection(const string &sectionStr)
     }
 }
 
-void myINIParser::delItem(const string &sectionStr, const string &itemStr)
+void IniParser::delItem(const string &sectionStr, const string &itemStr)
 {
     auto sec = getSection(sectionStr);
     if (!sec)
@@ -324,7 +322,7 @@ void myINIParser::delItem(const string &sectionStr, const string &itemStr)
     }
 }
 
-void myINIParser::setSectionValue(const string &sectionStr, const string &commentStr)
+void IniParser::setSectionValue(const string &sectionStr, const string &commentStr)
 {
     auto sec = getSection(sectionStr);
     if (!sec)
@@ -334,7 +332,7 @@ void myINIParser::setSectionValue(const string &sectionStr, const string &commen
     sec->comment = commentStr;
 }
 
-void myINIParser::setItemValue(const string &sectionStr, const string &itemStr, const string &valueStr, const string &commentStr/* = ""*/)
+void IniParser::setItemValue(const string &sectionStr, const string &itemStr, const string &valueStr, const string &commentStr/* = ""*/)
 {
     auto x = getItem(sectionStr, itemStr);
     if (!x)
@@ -345,7 +343,7 @@ void myINIParser::setItemValue(const string &sectionStr, const string &itemStr, 
     x->comment = commentStr;
 }
 
-int myINIParser::save(const string &filename) const
+int IniParser::save(const string &filename) const
 {
     FILE *fp = fopen(filename.c_str(), "w");
     if (fp == NULL)
@@ -358,8 +356,7 @@ int myINIParser::save(const string &filename) const
         buf += "[" + sec.second->name + "] " + sec.second->comment + EndChars;
         for ( auto it : sec.second->items)
         {
-            buf += it->comment + EndChars;
-            buf += it->key + " = " + it->value + EndChars;
+            buf += it->key + " = " + it->value + " " + it->comment + EndChars;
         }
         buf += EndChars;
     }

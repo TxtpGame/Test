@@ -5,18 +5,18 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 using namespace std;
 
-namespace MY_INI
+namespace INI_PARSER
 {
 #ifdef WIN32
 #define EndChars "\r\n"
 #else
 #define EndChars "\n"
 #endif
-
-#define MAX_LINE_NUM 2048
 
 struct item
 {
@@ -46,6 +46,7 @@ struct section
         for (auto i : items)
         {
             delete i;
+            i = NULL;
         }
         name    = "";
         comment = "";
@@ -60,7 +61,7 @@ struct ini
     ini()
     {
         filename = "";
-        commentFlags.push_back("#");
+        commentFlags = {";", "#"};
     }
     ~ini()
     {
@@ -68,15 +69,16 @@ struct ini
         for (auto s : sections)
         {
             delete s.second;
+            s.second = NULL;
         }
     }
 };
 
-class myINIParser
+class IniParser
 {
 public:
-    myINIParser();
-    ~myINIParser();
+    IniParser();
+    ~IniParser();
 
     int load(const string &filename);
     int save(const string &filename) const;

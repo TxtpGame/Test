@@ -1,15 +1,13 @@
-#include "myINI.h"
+#include "ini_parser.h"
 
 #include <iostream>
 
 using namespace std;
-using namespace MY_INI;
+using namespace INI_PARSER;
 
 int main(int argc, char const *argv[])
 {
-    vector<string> flags = {";", "#"};
-    myINIParser temp;
-    temp.setCommentFlags(flags);
+    IniParser temp;
 
     temp.load("test1.ini");
 
